@@ -1,4 +1,4 @@
-name: localmesh
+name: tethr
 services:
   server:
     image: python:3.12-alpine
@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     command: ["/bin/sh", "-c", "pip install -r req.txt && fastapi dev main.py --host 0.0.0.0 --port 8000"]
     environment:
-      - DATABASE_URL=postgres://localmesh:localmesh@db:5432/localmesh
+      - DATABASE_URL=postgres://tethr:tethr@db:5432/tethr
       - TORTOISE_ORM=lib.db.TORTOISE_CONFIG
       - JWT_SECRET=2146a714483b9146a31916e2bb05c1366d6439240b63859e6ae9d842aceeb263
       - CACHE_URL=redis://cache:6379/0
@@ -20,9 +20,9 @@ services:
   db:
     image: postgis/postgis:17-3.5-alpine
     environment:
-      - POSTGRES_USER=localmesh
-      - POSTGRES_PASSWORD=localmesh
-      - POSTGRES_DB=localmesh
+      - POSTGRES_USER=tethr
+      - POSTGRES_PASSWORD=tethr
+      - POSTGRES_DB=tethr
     
   cache:
     image: valkey/valkey:9-alpine
