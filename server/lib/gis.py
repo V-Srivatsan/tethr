@@ -1,4 +1,4 @@
-from tortoise import fields, Model
+from tortoise import fields, connections, Model
 from typing import TypeVar, Type
 
 T = TypeVar('T', bound=Model)
@@ -23,27 +23,19 @@ async def GIS_FindNear(
     location: tuple[float, float],
     distance_meters: float
 ):
-    """
-    Find records within a specified distance from a location using PostGIS.
-    
-    Args:
-        model: The Tortoise ORM model class with a location GISPointField
-        location: Tuple of (longitude, latitude)
-        distance_meters: Search radius in meters
-    
-    Returns:
-        List of model instances within the specified distance
-    """
     lon, lat = location
-    
-    
-    return await model.raw(
-        f"""
-        SELECT * FROM {model._meta.db_table}
+    conn = connections.get("default")
+    rows = await conn.execute_query_dict(f"""
+        SELECT *, ST_X({point_field}) AS lng, ST_Y({point_field}) AS lat FROM {model._meta.db_table}
         WHERE ST_DWithin(
             {point_field}::geography,
             ST_SetSRID(ST_MakePoint({lon}, {lat}), 4326)::geography,
             {distance_meters}
         )
-        """
-    )
+    """)
+
+    res = []
+    for row in rows:
+        res.append(model(**row))
+        setattr(res[-1], point_field, (row["lng"], row["lat"]))
+    return res
