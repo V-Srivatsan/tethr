@@ -19,7 +19,9 @@ async def list_communities(lat: float, lng: float):
         {
             "uid": comm.uid.hex,
             "name": comm.name,
-            "description": comm.description
+            "description": comm.description,
+            "lat": comm.location[1],
+            "lng": comm.location[0],
         } for comm in comms
     ] })
 
@@ -36,7 +38,7 @@ async def join_community(user_id: int, community_uid: str):
 
 
 async def accept_membership(admin_id: int, membership_uid: str):
-    membership = await Membership.get_or_none(uid=membership_uid).prefetch_related("community")
+    membership = await Membership.get_or_none(uid=membership_uid).select_related("community")
     if not membership: return (404, { "message": "Membership request not found" })
 
     if not (await Membership.filter(
@@ -50,7 +52,7 @@ async def accept_membership(admin_id: int, membership_uid: str):
 
 
 async def leave_community(user_id: int):
-    membership = await Membership.get_or_none(user_id=user_id, is_active=True).prefetch_related("community")
+    membership = await Membership.get_or_none(user_id=user_id, is_active=True).select_related("community")
     if not membership: return (404, { "message": "You are not part of any community" })
 
     if not membership.verified:
