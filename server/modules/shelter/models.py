@@ -1,4 +1,5 @@
 from tortoise import fields
+from tortoise.contrib.postgres.indexes import GistIndex
 from lib.db import BaseModel, BaseTimeMixin
 from lib.gis import GISPointField
 
@@ -9,3 +10,6 @@ class Shelter(BaseModel, BaseTimeMixin):
     capacity = fields.IntField(min_value=0)
     occupied = fields.IntField(min_value=0, default=0)
     creator = fields.ForeignKeyField("user.User", related_name="created_shelters")
+
+    class Meta:
+        indexes = [GistIndex(fields=["location"])]

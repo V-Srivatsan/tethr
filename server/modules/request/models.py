@@ -1,4 +1,5 @@
 from tortoise import fields
+from tortoise.contrib.postgres.indexes import GistIndex
 from lib.gis import GISPointField
 from lib.db import BaseModel, BaseTimeMixin
 
@@ -22,8 +23,14 @@ class Request(BaseModel, BaseTimeMixin):
     urgency = fields.SmallIntField(default=0, min_value=0, max_value=5)
     status = fields.CharEnumField(RequestStatus, default=RequestStatus.PENDING)
 
+    class Meta:
+        indexes = [GistIndex(fields=["location"])]
+
 
 class SOSRequest(BaseModel, BaseTimeMixin):
     user = fields.ForeignKeyField("user.User", related_name="sos_requests")
     location = GISPointField()
     resolved = fields.BooleanField(default=False)
+
+    class Meta:
+        indexes = [GistIndex(fields=["location"])]

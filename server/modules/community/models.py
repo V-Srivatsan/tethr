@@ -1,4 +1,5 @@
 from tortoise import fields
+from tortoise.contrib.postgres.indexes import GistIndex
 from lib.gis import GISPointField
 from lib.db import BaseModel, BaseTimeMixin
 
@@ -6,6 +7,9 @@ class Community(BaseModel):
     name = fields.CharField(max_length=50)
     description = fields.CharField(max_length=255)
     location = GISPointField()
+
+    class Meta:
+        indexes = [GistIndex(fields=["location"])]
 
 
 class Membership(BaseModel, BaseTimeMixin):
