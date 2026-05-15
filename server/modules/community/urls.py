@@ -18,6 +18,6 @@ async def list_communities(lat: float, lng: float):
 async def leave_community(user_id: int = Depends(middleware.get_user)):
     return parse_res(await logic.leave_community(user_id))
 
-@router.post("/join/{community_id}")
+@router.post("/join/{community_id}/")
 async def join_community(community_id: str, user_id: int = Depends(middleware.get_user)):
     return parse_res(await logic.join_community(user_id, community_id))
