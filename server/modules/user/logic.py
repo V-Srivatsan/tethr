@@ -7,11 +7,6 @@ from lib.cache import cache
 def generate_jwt(user: User):
     token = jwt.encode({
         "id": user.id,
-        "uid": user.uid.hex,
-        "name": user.name,
-        "phone": user.phone,
-        "role": user.role.value,
-        "verified": user.verified
     }, os.getenv("JWT_SECRET", "SECRET_KEY"))
 
     return token
@@ -44,3 +39,17 @@ async def verify_otp(phone: str, otp: str):
     cache.delete(f"otp:{phone}")
     token = generate_jwt(await User.get(phone=phone))
     return (200, { "token": token })
+
+
+async def get_user(user_id: int):
+    user = await User.get_or_none(id=user_id)
+    if not user: return (404, { "message": "User not found" })
+
+    active_comm = await user.memberships.filter(is_active=True).select_related("community").first()
+    return (200, {
+        "name": user.name,
+        "phone": user.phone,
+        "community": active_comm.community.name if active_comm else None,
+        "role": user.role.value,
+        "verified": user.verified
+    })
