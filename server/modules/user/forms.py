@@ -10,3 +10,6 @@ class Login(BaseModel):
 class VerifyOTP(BaseModel):
     phone: str
     otp: str
+
+class RefreshToken(BaseModel):
+    refresh_token: str

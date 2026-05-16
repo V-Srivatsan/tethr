@@ -1,15 +1,31 @@
 import jwt
 import os
 import random
-from .models import User
+import datetime
+from .models import User, RefreshToken
 from lib.cache import cache
 
-def generate_jwt(user: User):
+async def generate_jwt(user: User):
+    membership = await user.memberships.filter(is_active=True).first()
     token = jwt.encode({
         "id": user.id,
+        "verified": user.verified,
+        "community": membership.community_id if membership else None,
+        "community_verified": membership.verified if membership else False,
+        "is_admin": membership.is_admin if membership else False,
+        "exp": (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=30))
     }, os.getenv("JWT_SECRET", "SECRET_KEY"))
 
     return token
+
+
+async def refresh_token(refresh_token: str):
+    token = await RefreshToken.get_or_none(token=refresh_token).select_related("user")
+    if not token: return (404, { "message": "Refresh token not found" })
+
+    token.refresh()
+    await token.save()
+    return (200, { "token": await generate_jwt(token.user), "refresh_token": token.token })
 
 
 async def create_user(name: str, phone: str):
@@ -37,8 +53,17 @@ async def verify_otp(phone: str, otp: str):
     if cached_otp != otp: return (400, { "message": "Invalid OTP" })
     
     cache.delete(f"otp:{phone}")
-    token = generate_jwt(await User.get(phone=phone))
-    return (200, { "token": token })
+    
+    user = await User.get(phone=phone).select_related("refresh_token")
+    refresh_token = user.refresh_token
+    if refresh_token is None:
+        refresh_token = await RefreshToken.create(user=user)
+
+    token = await generate_jwt(user)
+    return (200, { 
+        "token": token, "refresh_token": refresh_token.token, 
+        "name": user.name 
+    })
 
 
 async def get_user(user_id: int):
