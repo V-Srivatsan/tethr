@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tethr/widgets/loader.dart';
+import 'package:tethr/screens/normal/community/setup/index.dart' as comm_setup;
 
 import './logic.dart' as logic;
 import './post.dart';
@@ -15,7 +16,7 @@ class Screen extends StatefulWidget {
 
 class _ScreenState extends State<Screen> {
 
-  bool loading = true;
+  bool loading = true, community_found = true;
   List<logic.Announcement> announcements = [];
 
   void addAnnouncement(logic.Announcement ann) => setState(() {
@@ -27,7 +28,10 @@ class _ScreenState extends State<Screen> {
     super.initState();
     () async {
       final res = await logic.getAnnouncements(context);
-      if (res == null) return;
+      if (res == null) {
+        setState(() { community_found = false; loading = false; });
+        return;
+      }
 
       if (res.$1) widget.setFab(FloatingActionButton(
         onPressed: () => showModalBottomSheet(
@@ -47,7 +51,11 @@ class _ScreenState extends State<Screen> {
       loading: loading,
       child: Padding(
         padding: .symmetric(horizontal: 20),
-        child: ListView(
+        child: !community_found ? Center(child: ElevatedButton(
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (ctx) => comm_setup.Screen())),
+          child: Text("Join a Community")
+        )) :
+        ListView(
           children: announcements.map((ann) => Card(
             child: Padding(
               padding: .symmetric(horizontal: 15, vertical: 10),

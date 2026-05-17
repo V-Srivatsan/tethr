@@ -3,7 +3,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:tethr/widgets/loader.dart';
 
 import './logic.dart' as logic;
-import 'package:tethr/screens/normal/dashboard/index.dart' as dashboard;
+import 'package:tethr/screens/normal/index.dart' as dashboard;
 
 class SignupForm extends StatefulWidget {
   const SignupForm({super.key});

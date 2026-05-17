@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:tethr/lib/store.dart';
 import 'package:tethr/screens/auth/index.dart' as auth;
-import 'package:tethr/screens/disaster/dashboard/index.dart' as dis_dashboard;
-import 'package:tethr/screens/normal/dashboard/index.dart' as norm_dashboard;
+import 'package:tethr/screens/disaster/dashboard/index.dart' as disaster;
+import 'package:tethr/screens/normal/index.dart' as normal;
 
 class Screen extends StatelessWidget {
   const Screen({super.key});
@@ -12,11 +12,11 @@ class Screen extends StatelessWidget {
   Widget build(BuildContext context) {
     () async {
       final logged = await Store.get(Store.TOKEN) != null;
-      final disaster = await PrefStore.isDisasterMode();
+      final is_disaster = await PrefStore.isDisasterMode();
 
       Navigator.pushReplacement(context, MaterialPageRoute(
         builder: (ctx) => !logged ? auth.Screen() :
-          disaster ? dis_dashboard.Screen() : norm_dashboard.Screen()
+          is_disaster ? disaster.Screen() : normal.Screen()
       ));
     }();
 

@@ -6,7 +6,7 @@ import 'package:tethr/widgets/fragment.dart';
 import 'package:tethr/widgets/loader.dart';
 import 'package:tethr/widgets/map.dart';
 
-import 'package:tethr/screens/normal/dashboard/index.dart' as dashboard;
+import 'package:tethr/screens/normal/index.dart' as dashboard;
 import './logic.dart' as logic;
 import 'create.dart';
 

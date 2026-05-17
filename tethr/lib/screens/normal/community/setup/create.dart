@@ -7,7 +7,7 @@ import 'package:tethr/widgets/loader.dart';
 import 'package:tethr/widgets/map.dart';
 
 import './logic.dart' as logic;
-import 'package:tethr/screens/normal/dashboard/index.dart' as dashboard;
+import 'package:tethr/screens/normal/index.dart' as dashboard;
 
 class CreateCommunity extends StatelessWidget {
   const CreateCommunity({super.key});

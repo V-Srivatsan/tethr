@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tethr/lib/store.dart';
 import 'package:tethr/widgets/fragment.dart';
 
-import './announcements/index.dart' as announcements;
+import 'announcements/index.dart' as announcements;
 
 class Screen extends StatefulWidget {
   const Screen({super.key});
