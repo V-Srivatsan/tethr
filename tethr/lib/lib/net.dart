@@ -90,7 +90,6 @@ Future<Map<String, dynamic>?> request(
   }
 
   if (res.ok) return res.data;
-
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.data["message"] ?? "An unexpected error occurred")));
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.data["detail"] ?? res.data["message"] ?? "An unexpected error occurred")));
   return null;
 }
