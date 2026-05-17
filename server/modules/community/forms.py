@@ -5,3 +5,7 @@ class CreateCommunity(BaseModel):
     description: str
     lat: float
     lng: float
+
+class PostAnnouncement(BaseModel):
+    title: str
+    content: str

@@ -21,3 +21,11 @@ async def leave_community(user_id: int = Depends(middleware.get_user)):
 @router.post("/join/{community_id}/")
 async def join_community(community_id: str, user_id: int = Depends(middleware.get_user)):
     return parse_res(await logic.join_community(user_id, community_id))
+
+@router.get("/announcements/")
+async def get_announcements(perm: dict = Depends(middleware.get_member)):
+    return parse_res(await logic.get_announcements(perm['community'], perm['is_admin']))
+
+@router.post("/announcements/")
+async def create_announcement(form: forms.PostAnnouncement, perm: dict = Depends(middleware.get_admin)):
+    return parse_res(await logic.create_announcement(perm['user'], perm['community'], form.title, form.content))

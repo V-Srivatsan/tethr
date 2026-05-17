@@ -18,3 +18,10 @@ class Membership(BaseModel, BaseTimeMixin):
     is_admin = fields.BooleanField(default=False)
     is_active = fields.BooleanField(default=True)
     verified = fields.BooleanField(default=False)
+
+
+class Announcement(BaseModel, BaseTimeMixin):
+    title = fields.CharField(max_length=100)
+    content = fields.TextField()
+    user = fields.ForeignKeyField("user.User", related_name="posted_announcements")
+    community = fields.ForeignKeyField("community.Community", related_name="announcements")

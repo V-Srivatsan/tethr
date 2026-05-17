@@ -1,4 +1,4 @@
-from .models import Community, Membership
+from .models import Community, Membership, Announcement
 from lib.gis import GIS_FindNear
 
 async def create_community(
@@ -69,3 +69,29 @@ async def leave_community(user_id: int):
     membership.is_active = False
     await membership.save()
     return (200, { "message": "Left the community successfully" })
+
+
+async def get_announcements(community_id: int, is_admin: bool):
+    announcements = await Announcement.filter(community_id=community_id)\
+        .order_by("-created_at", "-updated_at")\
+        .select_related("user").all()
+    return (200, { 
+        "is_admin": is_admin,
+        "announcements": [
+            {
+                "title": ann.title,
+                "content": ann.content,
+                "created_at": ann.created_at.isoformat(),
+                "updated_at": ann.updated_at.isoformat(),
+                "user": ann.user.name
+            } for ann in announcements
+        ] 
+    })
+
+
+async def create_announcement(user_id: int, community_id: int, title: str, content: str):
+    await Announcement.create(
+        community_id=community_id, user_id=user_id,
+        title=title, content=content
+    )
+    return (200, { "message": "Announcement created successfully" })
