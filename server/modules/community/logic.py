@@ -6,7 +6,7 @@ async def create_community(
     lat: float, lng: float
 ):
     if await Membership.filter(user_id=creator, is_active=True).exists():
-        return (429, { "message": "You are already part of a community" })
+        return (412, { "message": "You are already part of a community" })
     
     community = await Community.create(name=name, description=description, location=(lng, lat))
     await Membership.create(user_id=creator, community=community, is_admin=True, verified=True)
@@ -31,20 +31,18 @@ async def join_community(user_id: int, community_uid: str):
     if not community: return (404, { "message": "Community not found" })
 
     if await Membership.filter(user_id=user_id, is_active=True).exists():
-        return (429, { "message": "You are already part of a community" })
+        return (412, { "message": "You are already part of a community" })
 
     await Membership.create(user_id=user_id, community=community)
     return (200, { "message": "Requested to join community" })
 
 
-async def accept_membership(admin_id: int, membership_uid: str):
+async def accept_membership(admin_community: int, membership_uid: str):
     membership = await Membership.get_or_none(uid=membership_uid).select_related("community")
     if not membership: return (404, { "message": "Membership request not found" })
 
-    if not (await Membership.filter(
-        user_id=admin_id, community=membership.community, 
-        is_admin=True, is_active=True
-    ).exists()): return (403, { "message": "You are not an admin of this community" })
+    if admin_community != membership.community.id: 
+        return (403, { "message": "You are not an admin of this community" })
 
     membership.verified = True
     await membership.save()
@@ -59,12 +57,13 @@ async def leave_community(user_id: int):
         await membership.delete()
         return (200, { "message": "Left the community successfully" })
     
-    other_admin = await Membership.filter(
-        community=membership.community, is_admin=True, is_active=True
-    ).exclude(user_id=user_id).exists()
+    if membership.is_admin:
+        other_admin = await Membership.filter(
+            community=membership.community, is_admin=True, is_active=True
+        ).exclude(user_id=user_id).exists()
 
-    if membership.is_admin and not other_admin:
-        return (403, { "message": "You must transfer admin rights before leaving the community" })
+        if not other_admin:
+            return (403, { "message": "You must transfer admin rights before leaving the community" })
     
     membership.is_active = False
     await membership.save()
