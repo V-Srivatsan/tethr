@@ -1,4 +1,4 @@
-from .models import Community, Membership, Announcement
+from modules.community.models import Community, Membership
 from lib.gis import GIS_FindNear
 
 async def create_community(
@@ -37,16 +37,24 @@ async def join_community(user_id: int, community_uid: str):
     return (200, { "message": "Requested to join community" })
 
 
-async def accept_membership(admin_community: int, membership_uid: str):
-    membership = await Membership.get_or_none(uid=membership_uid).select_related("community")
-    if not membership: return (404, { "message": "Membership request not found" })
-
-    if admin_community != membership.community.id: 
-        return (403, { "message": "You are not an admin of this community" })
-
-    membership.verified = True
-    await membership.save()
-    return (200, { "message": "Membership request accepted" })
+async def get_community_info(community_id: int, is_admin: bool):
+    query = Membership.filter(community_id=community_id, is_active=True)
+    if not is_admin: query = query.filter(verified=True)
+    memberships = await query.order_by("user__name").select_related("user", "community").all()
+    
+    return (200, { 
+        "name": memberships[0].community.name,
+        "description": memberships[0].community.description,
+        
+        "members": {
+            member.uid.hex: {
+                "name": member.user.name,
+                "phone": member.user.phone,
+                "verified": member.verified,
+                "is_admin": member.is_admin
+            } for member in memberships
+        }
+    })
 
 
 async def leave_community(user_id: int):
@@ -68,29 +76,3 @@ async def leave_community(user_id: int):
     membership.is_active = False
     await membership.save()
     return (200, { "message": "Left the community successfully" })
-
-
-async def get_announcements(community_id: int, is_admin: bool):
-    announcements = await Announcement.filter(community_id=community_id)\
-        .order_by("-created_at", "-updated_at")\
-        .select_related("user").all()
-    return (200, { 
-        "is_admin": is_admin,
-        "announcements": [
-            {
-                "title": ann.title,
-                "content": ann.content,
-                "created_at": ann.created_at.isoformat(),
-                "updated_at": ann.updated_at.isoformat(),
-                "user": ann.user.name
-            } for ann in announcements
-        ] 
-    })
-
-
-async def create_announcement(user_id: int, community_id: int, title: str, content: str):
-    await Announcement.create(
-        community_id=community_id, user_id=user_id,
-        title=title, content=content
-    )
-    return (200, { "message": "Announcement created successfully" })
