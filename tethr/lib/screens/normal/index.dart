@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:tethr/lib/store.dart';
 import 'package:tethr/widgets/fragment.dart';
 
+import 'home/index.dart' as home;
 import 'announcements/index.dart' as announcements;
+import 'profile/index.dart' as profile;
+
+
+import 'profile/logic.dart' as profile_logic;
 
 class Screen extends StatefulWidget {
   const Screen({super.key});
@@ -13,9 +17,7 @@ class Screen extends StatefulWidget {
 
 class _ScreenState extends State<Screen> {
 
-  String? name = null;
-  int currIdx = 0;
-
+  bool loading = true; int currIdx = 0;
   FloatingActionButton? fab = null;
   void setFab(FloatingActionButton btn) => setState(() { fab = btn; });
 
@@ -23,22 +25,25 @@ class _ScreenState extends State<Screen> {
   void initState() {
     super.initState();
     () async {
-      final name = await Store.get(Store.NAME);
-      setState(() { this.name = name!; });
+      await profile_logic.getProfile(context);
+      if (mounted) setState(() => loading = false);
+      else loading = false;
     }();
   }
 
   @override
   Widget build(BuildContext context) {
       return Fragment(
-        loading: name == null, fab: fab,
-        title: "Welcome, $name",
+        loading: loading, fab: fab,
+        title: ["Tethr", "Announcements", "Your Requests", "Profile"][currIdx],
+
         body: SafeArea(child: [
-          Center(child: Text("Home")),
+          home.Screen(),
           announcements.Screen(setFab),
           Center(child: Text("Requests")),
-          Center(child: Text("Profile"))
+          profile.Screen()
         ][currIdx]),
+
         bottomNavBar: BottomNavigationBar(
           currentIndex: currIdx,
           onTap: (idx) => setState(() { currIdx = idx; fab = null; }),

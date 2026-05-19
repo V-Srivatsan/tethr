@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:tethr/widgets/loader.dart';
 import 'package:tethr/screens/normal/community/setup/index.dart' as comm_setup;
 
+import 'package:tethr/lib/profile.dart';
 import './logic.dart' as logic;
 import './post.dart';
 
@@ -16,7 +17,7 @@ class Screen extends StatefulWidget {
 
 class _ScreenState extends State<Screen> {
 
-  bool loading = true, community_found = true;
+  bool loading = true;
   List<logic.Announcement> announcements = [];
 
   void addAnnouncement(logic.Announcement ann) => setState(() {
@@ -26,22 +27,20 @@ class _ScreenState extends State<Screen> {
   @override
   void initState() {
     super.initState();
+    if (Profile.comm_admin)
+        widget.setFab(FloatingActionButton(
+          onPressed: () => showModalBottomSheet(
+              isScrollControlled: true,
+              context: context, enableDrag: true, showDragHandle: true,
+              builder: (ctx) => PostAnnouncement(addAnnouncement)
+          ),
+          child: Icon(Icons.add_comment),
+        ));
+
     () async {
       final res = await logic.getAnnouncements(context);
-      if (res == null) {
-        setState(() { community_found = false; loading = false; });
-        return;
-      }
-
-      if (res.$1) widget.setFab(FloatingActionButton(
-        onPressed: () => showModalBottomSheet(
-          isScrollControlled: true,
-          context: context, enableDrag: true, showDragHandle: true,
-          builder: (ctx) => PostAnnouncement(addAnnouncement)
-        ),
-        child: Icon(Icons.add_comment),
-      ));
-      setState(() {announcements = res.$2; loading = false; });
+      if (res == null) { setState(() { loading = false; }); return; }
+      setState(() {announcements = res; loading = false; });
     }();
   }
 
@@ -51,7 +50,7 @@ class _ScreenState extends State<Screen> {
       loading: loading,
       child: Padding(
         padding: .symmetric(horizontal: 20),
-        child: !community_found ? Center(child: ElevatedButton(
+        child: Profile.community == null ? Center(child: ElevatedButton(
           onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (ctx) => comm_setup.Screen())),
           child: Text("Join a Community")
         )) :

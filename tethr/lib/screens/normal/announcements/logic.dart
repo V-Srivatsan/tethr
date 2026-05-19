@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:tethr/lib/net.dart';
+import 'package:tethr/lib/profile.dart';
 
 class Announcement {
   final String user, title, content;
@@ -8,7 +9,8 @@ class Announcement {
   const Announcement(this.user, this.title, this.content, this.timestamp);
 }
 
-Future<(bool, List<Announcement>)?> getAnnouncements(BuildContext ctx) async {
+Future<List<Announcement>?> getAnnouncements(BuildContext ctx) async {
+  if (!Profile.verified) return null;
   final res = await request(ctx, path: "/community/announcements/", auth: true);
   if (res == null) return null;
 
@@ -18,7 +20,7 @@ Future<(bool, List<Announcement>)?> getAnnouncements(BuildContext ctx) async {
       DateTime.parse(ann["created_at"])
     )).toList();
 
-  return (res["is_admin"] as bool, announcements);
+  return announcements;
 }
 
 Future<bool> postAnnouncement(BuildContext ctx, Map<String, dynamic> data) async {
