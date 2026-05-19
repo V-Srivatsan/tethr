@@ -1,31 +1,7 @@
-from fastapi import APIRouter, Depends
-from lib.views import parse_res
-import middleware
-from . import logic, forms
+from fastapi import APIRouter
+from .admin.urls import router as admin_router
+from .member.urls import router as member_router
 
 router = APIRouter(prefix="/community")
-
-
-@router.post("/")
-async def create_community(form: forms.CreateCommunity, user_id: int = Depends(middleware.get_user)):
-    return parse_res(await logic.create_community(form.name, form.description, user_id, form.lat, form.lng))
-
-@router.get("/")
-async def list_communities(lat: float, lng: float):
-    return parse_res(await logic.list_communities(lat, lng))
-
-@router.delete("/")
-async def leave_community(user_id: int = Depends(middleware.get_user)):
-    return parse_res(await logic.leave_community(user_id))
-
-@router.post("/join/{community_id}/")
-async def join_community(community_id: str, user_id: int = Depends(middleware.get_user)):
-    return parse_res(await logic.join_community(user_id, community_id))
-
-@router.get("/announcements/")
-async def get_announcements(perm: dict = Depends(middleware.get_member)):
-    return parse_res(await logic.get_announcements(perm['community'], perm['is_admin']))
-
-@router.post("/announcements/")
-async def create_announcement(form: forms.PostAnnouncement, perm: dict = Depends(middleware.get_admin)):
-    return parse_res(await logic.create_announcement(perm['user'], perm['community'], form.title, form.content))
+router.include_router(admin_router)
+router.include_router(member_router)
