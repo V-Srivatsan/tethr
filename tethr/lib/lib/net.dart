@@ -67,7 +67,7 @@ Future<Map<String, dynamic>?> request(
     REQUEST method = REQUEST.GET,
     Map<String, String>? query,
     Map<String, dynamic>? data,
-    bool auth = false
+    bool auth = false, bool showError = true
   }
 ) async {
   Response res = await _request(path, method: method, query: query, data: data, auth: auth);
@@ -90,6 +90,9 @@ Future<Map<String, dynamic>?> request(
   }
 
   if (res.ok) return res.data;
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res.data["detail"] ?? res.data["message"] ?? "An unexpected error occurred")));
+  if (showError)
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(res.data["detail"] ?? res.data["message"] ?? "An unexpected error occurred")
+    ));
   return null;
 }
