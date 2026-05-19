@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Store {
   static final _storage = FlutterSecureStorage();
 
-  static const TOKEN = "token", REFRESH_TOKEN = "refresh_token", NAME = "name";
+  static const TOKEN = "token", REFRESH_TOKEN = "refresh_token", PROFILE = "profile";
 
   static Future<String?> get(String key) async {
     return await _storage.read(key: key);

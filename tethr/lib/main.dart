@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:tethr/lib/profile.dart';
 import 'package:tethr/screens/splash/index.dart' as splash;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Profile.load();
+
   runApp(MaterialApp(
     title: 'Tethr',
     theme: ThemeData(
