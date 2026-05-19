@@ -60,21 +60,22 @@ async def verify_otp(phone: str, otp: str):
         refresh_token = await RefreshToken.create(user=user)
 
     token = await generate_jwt(user)
-    return (200, { 
-        "token": token, "refresh_token": refresh_token.token, 
-        "name": user.name 
-    })
+    return (200, { "token": token, "refresh_token": refresh_token.token })
 
 
 async def get_user(user_id: int):
-    user = await User.get_or_none(id=user_id)
-    if not user: return (404, { "message": "User not found" })
-
+    user = await User.get(id=user_id)
     active_comm = await user.memberships.filter(is_active=True).select_related("community").first()
     return (200, {
-        "name": user.name,
-        "phone": user.phone,
-        "community": active_comm.community.name if active_comm else None,
-        "role": user.role.value,
-        "verified": user.verified
+        "user": {
+            "name": user.name,
+            "phone": user.phone,
+            "role": user.role.value,
+            "verified": user.verified
+        },
+        "community": {
+            "name": active_comm.community.name,
+            "verified": active_comm.verified,
+            "is_admin": active_comm.is_admin
+        } if active_comm else None
     })
