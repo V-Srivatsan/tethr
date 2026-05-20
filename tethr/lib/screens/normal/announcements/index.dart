@@ -27,20 +27,21 @@ class _ScreenState extends State<Screen> {
   @override
   void initState() {
     super.initState();
-    if (Profile.comm_admin)
-        widget.setFab(FloatingActionButton(
-          onPressed: () => showModalBottomSheet(
-              isScrollControlled: true,
-              context: context, enableDrag: true, showDragHandle: true,
-              builder: (ctx) => PostAnnouncement(addAnnouncement)
-          ),
-          child: Icon(Icons.add_comment),
-        ));
 
     () async {
       final res = await logic.getAnnouncements(context);
       if (res == null) { setState(() { loading = false; }); return; }
       setState(() {announcements = res; loading = false; });
+
+      if (Profile.comm_admin)
+        widget.setFab(FloatingActionButton(
+          onPressed: () => showModalBottomSheet(
+              isScrollControlled: true, context: context,
+              enableDrag: true, showDragHandle: true,
+              builder: (ctx) => PostAnnouncement(addAnnouncement)
+          ),
+          child: Icon(Icons.add_comment),
+        ));
     }();
   }
 

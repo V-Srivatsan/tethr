@@ -10,7 +10,7 @@ class Announcement {
 }
 
 Future<List<Announcement>?> getAnnouncements(BuildContext ctx) async {
-  if (!Profile.verified) return null;
+  if (!Profile.comm_verified) return null;
   final res = await request(ctx, path: "/community/announcements/", auth: true);
   if (res == null) return null;
 
